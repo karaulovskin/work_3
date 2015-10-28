@@ -1,21 +1,84 @@
-var gulp = require("gulp"),
-	browserSync = require ('browser-sync');
 
-gulp.task('server', function () { 
-	browserSync({
-		port: 9000,
-		server: {
-			baseDir: 'app'
+/* --------- plugins --------- */
+
+var
+	gulp        = require('gulp'),
+	// compass     = require('gulp-compass'),
+	jade        = require('gulp-jade'),
+	browserSync = require('browser-sync').create(),
+	plumber     = require('gulp-plumber');
+
+/* --------- paths --------- */
+
+var
+	paths = {
+		jade : {
+			location    : 'app/markups/**/*.jade',
+			compiled    : 'app/markups/_pages/*.jade',
+			destination : 'app'
+		},
+
+		scss : {
+			location    : 'styles/**/*.scss',
+			entryPoint  : 'css/main.css'
+		},
+
+		compass : {
+			configFile  : 'config.rb',
+			cssFolder   : 'css',
+			scssFolder  : 'styles',
+			imgFolder   : 'img'
+		},
+
+		browserSync : {
+			baseDir : 'app',
+			watchPaths : ['*.html', 'css/*.css', 'js/*.js']
 		}
-	}) ;
-}) ;
+	}
 
-gulp.task('watch', function () {
-	gulp.watch ([
-		'app/*.html',
-		'app/js/**/*.js',
-		'app/css/**/*.css'
-	]).on('change', browserSync.reload);
+/* --------- jade --------- */
+
+gulp.task('jade', function() {
+	gulp.src(paths.jade.compiled)
+		.pipe(plumber())
+		.pipe(jade({
+			pretty: '\t',         /* ... html - небыл одной строкой */
+		}))
+		.pipe(gulp.dest(paths.jade.destination));
 });
 
-gulp.task('default', ['server', 'watch']);
+/* --------- scss-compass --------- */
+
+gulp.task('compass', function() {
+	gulp.src(paths.scss.location)
+		.pipe(plumber())
+		.pipe(compass({
+			config_file: paths.compass.configFile,
+			css: paths.compass.cssFolder,
+			sass: paths.compass.scssFolder,
+			image: paths.compass.imgFolder
+		}));
+});
+
+/* --------- browser sync --------- */
+
+gulp.task('sync', function() {
+	browserSync.init({
+		server: {
+			baseDir: paths.browserSync.baseDir
+		}
+	});
+});
+
+/* --------- watch --------- */
+
+gulp.task('watch', function(){
+	gulp.watch(paths.jade.location, ['jade']);
+	gulp.watch(paths.scss.location, ['compass']);
+	
+	gulp.watch(paths.browserSync.watchPaths).on('change', browserSync.reload);
+});
+
+/* --------- default --------- */
+
+gulp.task('default', ['jade', 'sync', 'watch']);

@@ -2,6 +2,9 @@
   "name": "billetstart_qw",
   "devDependencies": {
     "browser-sync": "^2.9.10",
-    "gulp": "^3.9.0"
+    "gulp": "^3.9.0",
+    "gulp-jade": "^1.1.0",
+    "gulp-plumber": "^1.0.1"
+
   }
 }
